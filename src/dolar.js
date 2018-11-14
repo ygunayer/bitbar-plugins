@@ -79,11 +79,19 @@ const doGetData = function() {
   return new Promise((resolve, reject) => {
     request({
       url: `https://www.doviz.com/api/v1/currencies/USD/latest`,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:63.0) Gecko/20100101 Firefox/63.0',
+        'X-Requested-With': 'XMLHttpRequest',
+        'Referer': 'https://www.doviz.com/',
+        'DNT': '1',
+        'Cache-Control': 'max-age=0'
+      },
       json: true
     }, (err, response, body) => {
       if (err) {
         return reject(err);
       }
+
       resolve(body);
     })
   });
@@ -133,6 +141,10 @@ const db = new DB();
 
 Promise.all([ db.load(), doGetData() ])
   .then(([ previous, data ]) => {
+    if (!data) {
+      return previous;
+    }
+
     const current = data.selling;
     return update(previous, current);
   })
